@@ -3,13 +3,8 @@ on:
     branches:
       - master
   paths:
-      - build/**
+      - "build/**"
   workflow_dispatch:
-    inputs:
-      placeholder:
-        default: ""
-        description: "placeholder"
-        required: false
 
 env:
   REGISTRY_FQDN: ${{ secrets.REGISTRY_FQDN }}
