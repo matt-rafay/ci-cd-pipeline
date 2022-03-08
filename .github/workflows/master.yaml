@@ -1,0 +1,45 @@
+on:
+  push:
+    branches:
+      - master
+  paths:
+      - build/**
+  workflow_dispatch:
+
+env:
+  REGISTRY_FQDN: ${{ secrets.REGISTRY_FQDN }}
+  REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+  REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+        
+      - name: registry login
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY_FQDN }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+      
+      - name: extract image metadata
+        id: metadata
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ REGISTRY_FQDN }}/${{ REPOSITORY_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+      
+      - name: test
+        run: |
+          echo ${{ steps.metadata.tags }}
