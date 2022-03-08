@@ -5,6 +5,11 @@ on:
   paths:
       - build/**
   workflow_dispatch:
+    inputs:
+      placeholder:
+        default: ""
+        description: "placeholder"
+        required: false
 
 env:
   REGISTRY_FQDN: ${{ secrets.REGISTRY_FQDN }}
