@@ -32,7 +32,7 @@ jobs:
         id: metadata
         uses: docker/metadata-action@v3
         with:
-          images: ${{ REGISTRY_FQDN }}/${{ REPOSITORY_NAME }}
+          images: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
