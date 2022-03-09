@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         
       - name: configure git
         run: |
@@ -71,9 +71,13 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}:${{ env.VERSION }}
         
+      - name: checkout master
+        uses: actions/checkout@v3
+        with:
+          ref: master
+        
       - name: update manifest
         run: |
-          git checkout master
           cd deploy
           sed -i "s/image:.*/image: ${REGISTRY_FQDN}\/${REPOSITORY_NAME}:${VERSION}/g" deployment.yaml
           cat deployment.yaml
