@@ -50,7 +50,7 @@ jobs:
             version=${GITHUB_REF#refs/heads/*}
             [[ ${remote} == master ]] && version=latest
           else
-            remote=${GITHUB_REF#refs/tags/*}
+            remote=master
             version=${GITHUB_REF#refs/tags/*}
           fi
           
