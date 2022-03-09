@@ -19,7 +19,7 @@ env:
   REGISTRY_FQDN: registry.rafay.us
   REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
   REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-  REPOSITORY_NAME: ci-cd-demo-app
+  REPOSITORY_NAME: cicd-demo
 
 jobs:
   build:
