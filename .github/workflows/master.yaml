@@ -97,9 +97,7 @@ jobs:
           sed -i "s/image:.*/image: ${REGISTRY_FQDN}\/${REPOSITORY_NAME}:${VERSION}/g" deployment.yaml
           #sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g' deployment-unprivileged.yaml
           
-          cat deployment.yaml
-          
-          if [ -n $(git status -s) ]; then
+          if [ -n "$(git status -s)" ]; then
             cat deployment.yaml
             git add -A
             git commit -m "Set image tag to '${VERSION}'"
