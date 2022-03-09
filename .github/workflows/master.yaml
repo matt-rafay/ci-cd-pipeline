@@ -1,9 +1,9 @@
 on:
-  push:
+  create:
     branches-ignore:
       - master
     tags:
-      - "v*.*"
+      - v*.*
     paths:
       - "build/**"
   pull_request:
@@ -44,5 +44,3 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
