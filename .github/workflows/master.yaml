@@ -79,23 +79,12 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
           push: true
           tags: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}:${{ env.VERSION }}
-          
-      - name: build and push unprivileged image
-        if: github.event_name == 'create' || github.event.pull_request.merged == true
-        uses: docker/build-push-action@v2
-        with:
-          context: ./build
-          file: ./build/Dockerfile.unprivileged
-          labels: ${{ steps.metadata.outputs.labels }}
-          push: true
-          tags: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}:unprivileged-${{ env.VERSION }}
-      
+        
       - name: update deployment manifest
         if: github.event_name == 'create' || github.event.pull_request.merged == true
         run: |
           cd deploy
           sed -i "s/image:.*/image: ${REGISTRY_FQDN}\/${REPOSITORY_NAME}:${VERSION}/g" deployment.yaml
-          sed -i "s/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g" deployment-unprivileged.yaml
           
           if [ -n "$(git status -s)" ]; then
             cat deployment.yaml
