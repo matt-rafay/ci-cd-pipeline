@@ -89,7 +89,7 @@ jobs:
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           cd deploy
-          sed -i'' 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:${VERSION}/g' deployment.yaml
+          sed -i 's/image:.*/image: ${REGISTRY_FQDN}\/${REPOSITORY_NAME}:${VERSION}/g' deployment.yaml
           #sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g' deployment-unprivileged.yaml
           
           if [ -n $(git status -s) ]; then
