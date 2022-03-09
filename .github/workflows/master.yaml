@@ -1,7 +1,7 @@
 on:
   create:
-    branches-ignore:
-      - master
+    branches:
+      - *
     tags:
       - v*.*
     paths:
@@ -11,6 +11,8 @@ on:
       - master
     paths:
       - "build/**"
+    types:
+      - closed
   workflow_dispatch:
 
 env:
@@ -24,18 +26,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
+        if: github.event_name == 'push' || github.even_name == 'workflow_dispatch'
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
         
       - name: registry login
+        if: github.event_name == 'push' || github.even_name == 'workflow_dispatch'
         uses: docker/login-action@v1
         with:
           registry: ${{ env.REGISTRY_FQDN }}
           username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ env.REGISTRY_PASSWORD }}
-      
-      - name: extract image metadata
+        
+      - name: set tags
+        if: github.event_name == 'push' || github.even_name == 'workflow_dispatch'
+        run: |
+          if [[ ${GITHUB_REF} == refs/heads/* ]]; then
+            VERSION=${GITHUB_REF#refs/heads/*}
+            [[ ${VERSION} == master ]] && VERSION=latest
+          else
+            VERSION=${GITHUB_REF#refs/tags/*}
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        
+      - name: set metadata
+        if: github.event_name == 'push' || github.even_name == 'workflow_dispatch'
         id: metadata
         uses: docker/metadata-action@v3
         with:
@@ -43,4 +59,25 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
+            type=ref,event=tag
+            type=schedule
+        
+      - name: build and push image
+        if: github.event_name == 'push' || github.even_name == 'workflow_dispatch'
+        uses: docker/build-push-action@v2
+        with:
+          context: ./build
+          file: ./build/Dockerfile
+          labels: ${{ steps.metadata.outputs.labels }}
+          push: false
+          tags: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}:${{ env.VERSION }}
+          
+      #- name: build and push unprivileged image
+      #  if: github.event_name == 'push' || github.even_name == 'workflow_dispatch'
+      #  uses: docker/build-push-action@v2
+      #  with:
+      #    context: ./build
+      #    file: ./build/Dockerfile.unprivileged
+      #    labels: ${{ steps.metadata.outputs.labels }}
+      #    push: false
+      #    tags: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}:${{ env.VERSION }}
