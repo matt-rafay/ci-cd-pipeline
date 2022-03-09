@@ -13,7 +13,6 @@ on:
       - "build/**"
     types:
       - "closed"
-  workflow_dispatch:
 
 env:
   GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -29,18 +28,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repository
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'create' || github.event.pull_request.merged == true
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
         
       - name: configure git
+        if: github.event_name == 'create' || github.event.pull_request.merged == true
         run: |
           git config --global user.name "${GIT_USER_NAME}"
           git config --global user.email "${GIT_USER_EMAIL}"
         
       - name: registry login
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'create' || github.event.pull_request.merged == true
         uses: docker/login-action@v1
         with:
           registry: ${{ env.REGISTRY_FQDN }}
@@ -48,7 +48,7 @@ jobs:
           password: ${{ env.REGISTRY_PASSWORD }}
         
       - name: set tags
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'create' || github.event.pull_request.merged == true
         run: |
           if [[ ${GITHUB_REF} == refs/heads/* ]]; then
             VERSION=${GITHUB_REF#refs/heads/*}
@@ -59,7 +59,7 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
         
       - name: set metadata
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'create' || github.event.pull_request.merged == true
         id: metadata
         uses: docker/metadata-action@v3
         with:
@@ -71,7 +71,7 @@ jobs:
             type=schedule
         
       - name: build and push image
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'create' || github.event.pull_request.merged == true
         uses: docker/build-push-action@v2
         with:
           context: ./build
@@ -81,7 +81,7 @@ jobs:
           tags: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}:${{ env.VERSION }}
           
       - name: build and push unprivileged image
-        if: github.event_name == 'push' || github.even_name == 'workflow_dispatch'
+        if: github.event_name == 'create' || github.event.pull_request.merged == true
         uses: docker/build-push-action@v2
         with:
           context: ./build
@@ -91,11 +91,11 @@ jobs:
           tags: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}:unprivileged-${{ env.VERSION }}
       
       - name: update deployment manifest
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'create' || github.event.pull_request.merged == true
         run: |
           cd deploy
           sed -i "s/image:.*/image: ${REGISTRY_FQDN}\/${REPOSITORY_NAME}:${VERSION}/g" deployment.yaml
-          #sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g' deployment-unprivileged.yaml
+          sed -i "s/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g" deployment-unprivileged.yaml
           
           if [ -n "$(git status -s)" ]; then
             cat deployment.yaml
