@@ -43,26 +43,48 @@ jobs:
           username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ env.REGISTRY_PASSWORD }}
         
-      - name: set tags
+      - name: set environment
         run: |
           if [[ ${GITHUB_REF} == refs/heads/* ]]; then
-            BRANCH=${GITHUB_REF#refs/heads/*}
-            if [[ ${BRANCH} == master ]]; then
-              VERSION=lastest
-            else
-              VERSION=${BRANCH}
-            fi
+            remote=${GITHUB_REF#refs/heads/*}
+            version=${GITHUB_REF#refs/heads/*}
+            [[ ${remote} == master ]] && version=latest
           else
-            TAG=${GITHUB_REF#refs/tags/*}
-            VERSION=${TAG}
+            remote=${GITHUB_REF#refs/tags/*}
+            version=${GITHUB_REF#refs/tags/*}
           fi
           
-          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
-          echo "TAG=${TAG}" >> $GITHUB_ENV
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "REMOTE=${remote}" >> $GITHUB_ENV
+          echo "VERSION=${version}" >> $GITHUB_ENV
         
-      - name: test
+      - name: set metadata
+        id: metadata
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=schedule
+        
+      - name: build and push image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./build
+          file: ./build/Dockerfile
+          labels: ${{ steps.metadata.outputs.labels }}
+          push: true
+          tags: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}:${{ env.VERSION }}
+        
+      - name: update manifest
         run: |
-          echo ${BRANCH}
-          echo ${TAG}
-          echo ${VERSION}
+          cd deploy
+          sed -i "s/image:.*/image: ${REGISTRY_FQDN}\/${REPOSITORY_NAME}:${VERSION}/g" deployment.yaml
+          cat deployment.yaml
+          
+          if [ -n "$(git status -s)" ]; then
+            git add -A
+            git commit -m "Set image tag to '${VERSION}'"
+            git push ${REMOTE}
+          fi
