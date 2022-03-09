@@ -81,3 +81,9 @@ jobs:
       #    labels: ${{ steps.metadata.outputs.labels }}
       #    push: false
       #    tags: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}:unprivileged-${{ env.VERSION }}
+      
+      - name: update deployment manifest
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:${VERSION}/g' deploy/deployment.yaml
+          sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g' deploy/deployment-unprivileged.yaml
