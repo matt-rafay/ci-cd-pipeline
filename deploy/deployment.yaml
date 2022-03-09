@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: ci-cd-demo-app
   annotations:
-    rafay.dev/registry-ko8r76m: registry-rafay-us
+	rafay.dev/registry-mpor072: rafay-us-private
 spec:
   replicas: 2
   selector:
