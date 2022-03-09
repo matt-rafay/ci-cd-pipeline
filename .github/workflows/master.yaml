@@ -83,7 +83,7 @@ jobs:
           cat deployment.yaml
           
           if [ -n "$(git status -s)" ]; then
-            git add -a
+            git add -A
             git commit -m "Set image tag to '${VERSION}'"
             git push origin master
           fi
