@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-LABEL maintainer="Matt Kryshak <matt.kryshak@nginx.com>"
+LABEL maintainer="matt-rafay <https://github.com/matt-rafay>"
 
 COPY html /usr/share/nginx
 COPY nginx/certs /etc/nginx/certs
