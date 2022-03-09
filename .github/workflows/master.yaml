@@ -6,11 +6,11 @@ on:
       - "v*.*"
     paths:
       - "build/**"
-  #push:
-  #  branches:
-  #    - "master"
-  #  paths:
-  #    - "build/**"
+  push:
+    branches:
+      - "master"
+    paths:
+      - "build/**"
 
 env:
   GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -76,11 +76,12 @@ jobs:
       - name: update manifest
         run: |
           cd deploy
+          git checkout master
           sed -i "s/image:.*/image: ${REGISTRY_FQDN}\/${REPOSITORY_NAME}:${VERSION}/g" deployment.yaml
           cat deployment.yaml
           
           if [ -n "$(git status -s)" ]; then
-            git add deployment.yaml
+            git add -a
             git commit -m "Set image tag to '${VERSION}'"
-            git push origin HEAD:master
+            git push origin master
           fi
