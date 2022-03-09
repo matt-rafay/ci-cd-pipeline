@@ -83,4 +83,4 @@ jobs:
             git add deployment.yaml
             git commit -m "Set image tag to '${VERSION}'"
             git push origin HEAD:master
-          fi 
+          fi
