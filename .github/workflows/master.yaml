@@ -46,15 +46,12 @@ jobs:
       - name: set environment
         run: |
           if [[ ${GITHUB_REF} == refs/heads/* ]]; then
-            remote=${GITHUB_REF#refs/heads/*}
             version=${GITHUB_REF#refs/heads/*}
-            [[ ${remote} == master ]] && version=latest
+            [[ ${version} == master ]] && version=latest
           else
-            remote=master
             version=${GITHUB_REF#refs/tags/*}
           fi
           
-          echo "REMOTE=${remote}" >> $GITHUB_ENV
           echo "VERSION=${version}" >> $GITHUB_ENV
         
       - name: set metadata
@@ -86,5 +83,5 @@ jobs:
           if [ -n "$(git status -s)" ]; then
             git add -A
             git commit -m "Set image tag to '${VERSION}'"
-            git push origin ${REMOTE}
+            git push origin HEAD:master
           fi
