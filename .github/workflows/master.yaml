@@ -50,7 +50,6 @@ jobs:
       - name: set tags
         if: github.event_name == 'create' || github.event.pull_request.merged == true
         run: |
-          echo ${GITHB_REF}
           if [[ ${GITHUB_REF} == refs/heads/* ]]; then
             VERSION=${GITHUB_REF#refs/heads/*}
             [[ ${VERSION} == master ]] && VERSION=latest
@@ -58,6 +57,13 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/*}
           fi
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "TEST=${GITHUB_REF}" >> $GITHUB_ENV
+      
+      - name: test
+        if: github.event_name == 'create' || github.event.pull_request.merged == true
+        run: |
+          echo $VERSION
+          echo $TEST
         
       #- name: set metadata
       #  if: github.event_name == 'create' || github.event.pull_request.merged == true
