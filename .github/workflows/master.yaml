@@ -90,7 +90,7 @@ jobs:
         run: |
           cd deploy
           sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:${VERSION}/g' deployment.yaml
-          sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g' deployment-unprivileged.yaml
+          #sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g' deployment-unprivileged.yaml
           
           if [ -n $(git status -s) ]; then
             git add -A
