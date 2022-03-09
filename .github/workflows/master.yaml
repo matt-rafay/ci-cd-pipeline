@@ -1,7 +1,7 @@
 on:
   create:
     branches:
-      - *
+      - "*"
     tags:
       - v*.*
     paths:
