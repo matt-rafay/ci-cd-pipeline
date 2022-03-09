@@ -1,5 +1,12 @@
 on:
   push:
+    branches-ignore:
+      - master
+    tags:
+      - "v*.*"
+    paths:
+      - "build/**"
+  pull_request:
     branches:
       - master
     paths:
@@ -7,10 +14,10 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_FQDN: ${{ secrets.REGISTRY_FQDN }}
+  REGISTRY_FQDN: registry.rafay.us
   REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
   REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-  REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+  REPOSITORY_NAME: ci-cd-demo-app
 
 jobs:
   build:
@@ -39,7 +46,3 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha
-      
-      - name: test
-        run: |
-          echo ${{ steps.metadata.tags }}
