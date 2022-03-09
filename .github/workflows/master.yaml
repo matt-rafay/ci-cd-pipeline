@@ -94,14 +94,13 @@ jobs:
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           cd deploy
-          sed -i 's/image:.*/image: ${REGISTRY_FQDN}\/${REPOSITORY_NAME}:${VERSION}/g' deployment.yaml
+          sed -i "s/image:.*/image: ${REGISTRY_FQDN}\/${REPOSITORY_NAME}:${VERSION}/g" deployment.yaml
           #sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g' deployment-unprivileged.yaml
           
           cat deployment.yaml
-          echo $(git status -s)
           
           if [ -n $(git status -s) ]; then
-            echo "HERE"
+            cat deployment.yaml
             git add -A
             git commit -m "Set image tag to '${VERSION}'"
             git push origin master
