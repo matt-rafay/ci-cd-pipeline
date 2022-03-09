@@ -31,7 +31,6 @@ jobs:
           fetch-depth: 2
         
       - name: configure git
-        if: github.event_name == 'create' || github.event.pull_request.merged == true
         run: |
           git config --global user.name "${GIT_USER_NAME}"
           git config --global user.email "${GIT_USER_EMAIL}"
