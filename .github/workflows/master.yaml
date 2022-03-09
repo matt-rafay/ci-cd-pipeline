@@ -16,10 +16,13 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY_FQDN: registry.rafay.us
+  GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+  GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  REGISTRY_FQDN: ${{ serets.REGISTRY_FQDN }}
   REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
   REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-  REPOSITORY_NAME: ci-cd-demo-app
+  REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
 
 jobs:
   build:
@@ -85,5 +88,12 @@ jobs:
       - name: update deployment manifest
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
-          sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:${VERSION}/g' deploy/deployment.yaml
-          sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g' deploy/deployment-unprivileged.yaml
+          cd deploy
+          sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:${VERSION}/g' deployment.yaml
+          sed -i 's/image:.*/image: ${REGISTRY_FQDN}/${REPOSITORY_NAME}:unprivileged-${VERSION}/g' deployment-unprivileged.yaml
+          
+          if [ -n $(git status -s) ]; then
+            git add -A
+            git commit -m "Set container image tag to '${VERSION}'"
+            git push origin master
+          fi
