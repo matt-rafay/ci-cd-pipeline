@@ -1,18 +1,18 @@
 on:
   create:
     branches:
-      - *
+      - "*"
     tags:
-      - v*.*
+      - "v*.*"
     paths:
       - "build/**"
   pull_request:
     branches:
-      - master
+      - "master"
     paths:
       - "build/**"
     types:
-      - closed
+      - "closed"
   workflow_dispatch:
 
 env:
