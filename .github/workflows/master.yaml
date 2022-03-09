@@ -6,11 +6,11 @@ on:
       - "v*.*"
     paths:
       - "build/**"
-  push:
-    branches:
-      - "master"
-    paths:
-      - "build/**"
+  #push:
+  #  branches:
+  #    - "master"
+  #  paths:
+  #    - "build/**"
 
 env:
   GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
