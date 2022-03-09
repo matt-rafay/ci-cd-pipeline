@@ -1,18 +1,16 @@
 on:
-  #create:
-  #  branches-ignore:
-  #    - "master"
-  #  tags:
-  #    - "v*.*"
-  #  paths:
-  #    - "build/**"
-  pull_request:
+  create:
+    branches-ignore:
+      - "master"
+    tags:
+      - "v*.*"
+    paths:
+      - "build/**"
+  push:
     branches:
       - "master"
     paths:
       - "build/**"
-    types:
-      - "closed"
 
 env:
   GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
@@ -27,76 +25,44 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      #- name: checkout repository
-      #  if: github.event_name == 'create' || github.event.pull_request.merged == true
-      #  uses: actions/checkout@v2
-      #  with:
-      #    fetch-depth: 2
+      - name: checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
         
-      #- name: configure git
-      #  if: github.event_name == 'create' || github.event.pull_request.merged == true
-      #  run: |
-      #    git config --global user.name "${GIT_USER_NAME}"
-      #    git config --global user.email "${GIT_USER_EMAIL}"
+      - name: configure git
+        if: github.event_name == 'create' || github.event.pull_request.merged == true
+        run: |
+          git config --global user.name "${GIT_USER_NAME}"
+          git config --global user.email "${GIT_USER_EMAIL}"
         
-      #- name: registry login
-      #  if: github.event_name == 'create' || github.event.pull_request.merged == true
-      #  uses: docker/login-action@v1
-      #  with:
-      #    registry: ${{ env.REGISTRY_FQDN }}
-      #    username: ${{ env.REGISTRY_USERNAME }}
-      #    password: ${{ env.REGISTRY_PASSWORD }}
+      - name: registry login
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY_FQDN }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_PASSWORD }}
         
       - name: set tags
-        if: github.event_name == 'create' || github.event.pull_request.merged == true
         run: |
           if [[ ${GITHUB_REF} == refs/heads/* ]]; then
-            VERSION=${GITHUB_REF#refs/heads/*}
-            [[ ${VERSION} == master ]] && VERSION=latest
+            BRANCH=${GITHUB_REF#refs/heads/*}
+            if [[ ${BRANCH} == master ]]; then
+              VERSION=lastest
+            else
+              VERSION=${BRANCH}
+            fi
           else
-            VERSION=${GITHUB_REF#refs/tags/*}
+            TAG=${GITHUB_REF#refs/tags/*}
+            VERSION=${TAG}
           fi
+          
+          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
+          echo "TAG=${TAG}" >> $GITHUB_ENV
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "TEST=${GITHUB_REF}" >> $GITHUB_ENV
-      
+        
       - name: test
-        if: github.event_name == 'create' || github.event.pull_request.merged == true
         run: |
-          echo $VERSION
-          echo $TEST
-        
-      #- name: set metadata
-      #  if: github.event_name == 'create' || github.event.pull_request.merged == true
-      #  id: metadata
-      #  uses: docker/metadata-action@v3
-      #  with:
-      #    images: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}
-      #    tags: |
-      #      type=ref,event=branch
-      #      type=ref,event=pr
-      #      type=ref,event=tag
-      #      type=schedule
-        
-      #- name: build and push image
-      #  if: github.event_name == 'create' || github.event.pull_request.merged == true
-      #  uses: docker/build-push-action@v2
-      #  with:
-      #    context: ./build
-      #    file: ./build/Dockerfile
-      #    labels: ${{ steps.metadata.outputs.labels }}
-      #    push: true
-      #    tags: ${{ env.REGISTRY_FQDN }}/${{ env.REPOSITORY_NAME }}:${{ env.VERSION }}
-        
-      #- name: update deployment manifest
-      #  if: github.event_name == 'create' || github.event.pull_request.merged == true
-      #  run: |
-      #    cd deploy
-      #    sed -i "s/image:.*/image: ${REGISTRY_FQDN}\/${REPOSITORY_NAME}:${VERSION}/g" deployment.yaml
-      #    git status
-      #    cat deployment.yaml
-      #    
-      #    if [ -n "$(git status -s)" ]; then
-      #      git add -A
-      #      git commit -m "Set image tag to '${VERSION}'"
-      #      git push master
-      #    fi
+          echo ${BRANCH}
+          echo ${TAG}
+          echo ${VERSION}
