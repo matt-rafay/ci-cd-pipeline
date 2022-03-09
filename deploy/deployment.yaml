@@ -43,3 +43,4 @@ spec:
       targetPort: https
   selector:
     app.kubernetes.io/name: ci-cd-demo-app
+
