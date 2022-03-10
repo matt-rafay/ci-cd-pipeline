@@ -87,3 +87,4 @@ jobs:
             git commit -m "Set image tag to '${VERSION}'"
             git push origin master
           fi
+
