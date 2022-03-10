@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: ci-cd-demo-app
-          image: registry.rafay.us/ci-cd-demo-app:v1.1
+          image: registry.rafay.us/ci-cd-demo-app:v1.0
           imagePullPolicy: Always
           ports:
             - name: http
